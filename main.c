@@ -44,7 +44,7 @@ int lines;
 int main(int argc, char *argv[]) {
   List *list;
   int opcao;
-  char arquivo[] = "entrada_30.txt";
+  char arquivo[] = "entrada_6.txt";
 
   lines = contar_linhas(arquivo); // QUANTIDADE DE CIDADES
 
