@@ -44,7 +44,7 @@ int lines;
 int main(int argc, char *argv[]) {
   List *list;
   int opcao;
-  char arquivo[] = "entrada_6.txt";
+  char arquivo[] = "entrada_100.txt";
 
   lines = contar_linhas(arquivo); // QUANTIDADE DE CIDADES
 
@@ -261,7 +261,7 @@ int getOrigem() {
   do {
     printf("\nLocal de ORIGEM: ");
     scanf("%d", &cit);
-  } while (cit < 0 || cit > 29);
+  } while (cit < 0 || cit > lines - 1);
   return cit;
 }
 
@@ -271,7 +271,7 @@ int getDestino() {
   do {
     printf("\nLocal de DESTINO: ");
     scanf("%d", &cit);
-  } while (cit < 0 || cit > 29);
+  } while (cit < 0 || cit > lines - 1);
   return cit;
 }
 
@@ -280,17 +280,17 @@ int encontrarMenorVertice(List *list, float *estimativa, int *finalizado) {
   Node *no = get_first_element(list);
   int menorVert, menor = 9999;
 
-  while (!node_empty(no)) {
+  while (!node_empty(no)) { // PERCORRE OS NOS ADJACENTES
     int idAdj = get_id(no);
-    if (finalizado[idAdj] == 0) {
-      if (estimativa[idAdj] < menor) {
+    if (finalizado[idAdj] == 0) {      // CASO NAO FOI VISITADO
+      if (estimativa[idAdj] < menor) { // VERIFICA A MENOR DISTANCIA
         menorVert = idAdj;
         menor = estimativa[idAdj];
       }
     }
     no = node_next(no);
   }
-  return menorVert;
+  return menorVert; // RETORNA A ARESTA MENOR
 }
 
 /*------------------------------------------------------------*/
@@ -313,43 +313,51 @@ void geraCaminho(float *estimativa, int *precedente, int origem, int destino) {
 /*------------------------------------------------------------*/
 void buscarMenorCaminho(List *list, float *estimativas, int *precedentes,
                         int *finalizado, int origem, int destino) {
-  int ultimo = origem;
-  int menorVert;
-  Node *no;
+  int ultimo = origem; // PERCORRE O GRAFO
+  int menorVert;       // ARMAZENA MENOR VETOR
+  Node *no;            // PERCORRE ARESTAS ADJACENTES
 
-  while (ultimo != destino) {
-    no = get_first_element(&list[ultimo]);
+  while (ultimo != destino) {              // LOOP ATE CHEGAR NO DESTINO
+    no = get_first_element(&list[ultimo]); // PEGA PRIMEIRO ADJACENTE
 
-    while (!node_empty(no)) {
+    while (!node_empty(no)) { // PERCORRE CIDADES ADJACENTES
       int citAdj = get_id(no);
 
-      if (finalizado[citAdj] == 0) {
-        float caminho = get_distancia(no) + estimativas[ultimo];
+      if (finalizado[citAdj] == 0) { // SE NAO FOI VIZITADO
+        float caminho = get_distancia(no) +
+                        estimativas[ultimo]; // DISTANCIA DA ADRESTA ATE ORIGEM
 
-        if (caminho < estimativas[citAdj]) {
+        if (caminho < estimativas[citAdj]) { // CASO A DISTANCIA SEJA MENOR
           estimativas[citAdj] = caminho;
           precedentes[citAdj] = ultimo;
         }
       }
       no = node_next(no);
     }
-    menorVert = encontrarMenorVertice(&list[ultimo], estimativas, finalizado);
+    menorVert = encontrarMenorVertice(
+        &list[ultimo], estimativas,
+        finalizado); // PEGA A MENOR DISTANCIA DOS ADJACENTES
 
-    ultimo = menorVert;
+    ultimo = menorVert; // PASSA PARA O DE MENOR DISTANCIA
     finalizado[ultimo] = 1;
   }
-  geraCaminho(estimativas, precedentes, origem, destino);
+  geraCaminho(estimativas, precedentes, origem,
+              destino); // EXIBE O MENOR CAMINHO
 }
 
 /*------------------------------------------------------------*/
 void dijikstra(List *list) {
-  float estimativas[lines];
-  int precedentes[lines], finalizado[lines];
+  float estimativas[lines]; // ARRAY DA DISTANCIA DAS CIDADES ATE A CIDADE DE
+                            // ORIGEM
+  int precedentes[lines],
+      finalizado[lines]; // ARRAY DE PRECEDENTES DE CADA ARESTA
+                         // ARRAY QUE VERIFICA SE A ARESTA JA FOI VISITADA
   int origem, destino;
 
-  origem = getOrigem();
-  destino = getDestino();
+  origem = getOrigem();   // PEGA A ARESTA DE ORIGEM
+  destino = getDestino(); // PEGA A ARESTA DE DESTINO
 
+  // INICIALIZA OS ARRAY
   initEstimativas(estimativas);
   initPrecedentes(precedentes);
   initFinalizado(finalizado);
@@ -358,6 +366,7 @@ void dijikstra(List *list) {
   precedentes[origem] = origem;
   finalizado[origem] = 1;
 
+  // INICIA A BUSCA
   buscarMenorCaminho(list, estimativas, precedentes, finalizado, origem,
                      destino);
 }
